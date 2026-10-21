@@ -25,12 +25,16 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  IMAGE: logru/africapolis
+  # Must match the dockerPull of the cwl/*.cwl tools, so the CWL run uses the freshly built image.
+  IMAGE: ghcr.io/dfg-sos/africapolis
   CWLTOOL_VERSION: 3.1.20260108082145
 
 jobs:
   build-test-publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - uses: actions/checkout@v4
 
@@ -44,7 +48,7 @@ jobs:
 
       # The build stage of the Dockerfile compiles and installs all binaries.
       # The image is loaded into the local daemon, so the CWL run below uses it
-      # instead of pulling logru/africapolis:latest from Docker Hub.
+      # instead of pulling the published image from the registry.
       - name: Build binaries and Docker image
         uses: docker/build-push-action@v6
         with:
@@ -94,12 +98,13 @@ jobs:
           path: ci-output/
           if-no-files-found: ignore
 
-      - name: Log in to Docker Hub
+      - name: Log in to GitHub Container Registry
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       # Pushes the exact image that passed the CWL run above.
       - name: Publish Docker image

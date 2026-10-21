@@ -10,5 +10,6 @@ RUN cmake --install .
 
 # Runtime stage
 FROM ghcr.io/osgeo/gdal:ubuntu-small-3.12.2 AS runtime
+LABEL org.opencontainers.image.source=https://github.com/dfg-sos/africapolis
 COPY --from=build /usr/local/bin /usr/local/bin
 COPY --from=build /usr/local/lib /usr/local/lib

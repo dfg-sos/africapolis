@@ -32,7 +32,7 @@ if [ ! -d "$WORKFLOW_DIR" ] || [ "$REINSTALL" = true ]; then
     mkdir -p "$WORKFLOW_DIR"
     cd $TMPDIR
     rm -rf africapolis
-    git clone https://github.com/LoloGruber/africapolis.git
+    git clone https://github.com/dfg-sos/africapolis.git
     cp africapolis/Africapolis.cwl $WORKFLOW_DIR/Africapolis.cwl
     cp -r africapolis/cwl $WORKFLOW_DIR/cwl
     cp -r africapolis/jobs $WORKFLOW_DIR/jobs

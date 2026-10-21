@@ -3,7 +3,7 @@ class: CommandLineTool
 baseCommand: [AfricapolisEdgeVisualization]
 hints:
   DockerRequirement:
-    dockerPull: logru/africapolis:latest
+    dockerPull: ghcr.io/dfg-sos/africapolis:latest
 requirements:
   InlineJavascriptRequirement: {}
   ResourceRequirement:

@@ -5,7 +5,7 @@ The *Africapolis* Workflow clusters and visualizes urban areas from individual b
 
 # Quick Start
 All binaries of the workflow and the GDAL library are packaged in the
-[_logru/africapolis_](https://hub.docker.com/r/logru/africapolis) docker image, the Fishnet tools in
+[_ghcr.io/dfg-sos/africapolis_](https://github.com/dfg-sos/africapolis/pkgs/container/africapolis) docker image, the Fishnet tools in
 [_ghcr.io/descartesresearch/fishnet-apps_](https://github.com/DescartesResearch/fishnet/pkgs/container/fishnet-apps). The CWL files reference both
 images, so the only requirements are docker and a [CWL Runner](https://www.commonwl.org/implementations/)
 supporting containerized execution, e.g. the reference runner [cwltool](https://cwltool.readthedocs.io/en/latest/cli.html#cwltool):
@@ -207,22 +207,22 @@ AfricapolisSpatialClustering --mode DBSC --distance-threshold 200 --min-cluster-
 
 ### Docker Image
 The [Dockerfile](Dockerfile) builds the binaries on top of `ghcr.io/descartesresearch/fishnet-deps` and copies them into
-a GDAL runtime image. Since the CWL files reference `logru/africapolis:latest`, a locally built image
+a GDAL runtime image. Since the CWL files reference `ghcr.io/dfg-sos/africapolis:latest`, a locally built image
 is picked up by `cwltool` instead of the published one:
 ```shell
-docker build -t logru/africapolis:latest .
+docker build -t ghcr.io/dfg-sos/africapolis:latest .
 cwltool Africapolis.cwl jobs/default.yml
 ```
-The image is published by the CI pipeline. [update.sh](update.sh) builds it by hand, pushing it with `--push`.
+The image is published by the CI pipeline.
 
 ### CI/CD
 The [CI workflow](.github/workflows/ci.yml) runs on pushes and pull requests to `main` that touch
 the binaries, the image or the workflow tested by it (`src`, `lib`, `CMakeLists.txt`, `Dockerfile`,
 `Africapolis.cwl`, `cwl`, `jobs/default.yml` and the pipeline itself). Changes to
 the documentation, the other job files or the HPC scripts do not trigger it.
-1. Builds the binaries by building the [Dockerfile](Dockerfile) (`logru/africapolis:latest` and `logru/africapolis:<version>`, the version taken from [CMakeLists.txt](CMakeLists.txt))
+1. Builds the binaries by building the [Dockerfile](Dockerfile) (`ghcr.io/dfg-sos/africapolis:latest` and `ghcr.io/dfg-sos/africapolis:<version>`, the version taken from [CMakeLists.txt](CMakeLists.txt))
 2. Runs every binary with `--help` as a smoke test
 3. Validates [Africapolis.cwl](Africapolis.cwl) and executes it with [jobs/default.yml](jobs/default.yml) using `cwltool`, against the freshly built image. The outputs are uploaded as the `africapolis-output` artifact.
-4. On pushes to `main` only, publishes both image tags to Docker Hub.
+4. On pushes to `main` only, publishes both image tags to the GitHub Container Registry.
 
-Publishing requires the repository secrets `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN` (a Docker Hub access token with write permission).
+Publishing authenticates with the workflow's `GITHUB_TOKEN`, so no secrets are needed.

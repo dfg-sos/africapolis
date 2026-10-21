@@ -3,7 +3,7 @@ class: CommandLineTool
 baseCommand: [AfricapolisSpatialClustering]
 hints:
   DockerRequirement:
-    dockerPull: logru/africapolis:latest
+    dockerPull: ghcr.io/dfg-sos/africapolis:latest
 requirements:
   InlineJavascriptRequirement: {}
   ResourceRequirement:

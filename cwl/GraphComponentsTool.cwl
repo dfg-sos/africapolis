@@ -3,7 +3,7 @@ class: CommandLineTool
 baseCommand: [AfricapolisGraphComponents]
 hints:
   DockerRequirement:
-    dockerPull: logru/africapolis:latest
+    dockerPull: ghcr.io/dfg-sos/africapolis:latest
 requirements:
   ResourceRequirement:
     coresMin: 1
