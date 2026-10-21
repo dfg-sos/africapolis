@@ -1,12 +1,12 @@
 # Africapolis Workflow
-The *Africapolis* Workflow clusters and visualizes urban areas from individual building footprint polygons. It is orchestrated with the [Common Workflow Language (CWL)](https://www.commonwl.org/user_guide/), with each stage being a C++ command line program wrapped with CWL. The implementation depends on the [*Fishnet*](https://github.com/LoloGruber/fishnet.git) framework.
+The *Africapolis* Workflow clusters and visualizes urban areas from individual building footprint polygons. It is orchestrated with the [Common Workflow Language (CWL)](https://www.commonwl.org/user_guide/), with each stage being a C++ command line program wrapped with CWL. The implementation depends on the [*Fishnet*](https://github.com/DescartesResearch/fishnet) framework.
 
 ![](doc/Kahama_Africapolis.png)
 
 # Quick Start
 All binaries of the workflow and the GDAL library are packaged in the
 [_logru/africapolis_](https://hub.docker.com/r/logru/africapolis) docker image, the Fishnet tools in
-[_logru/fishnet-apps_](https://hub.docker.com/r/logru/fishnet-apps). The CWL files reference both
+[_ghcr.io/descartesresearch/fishnet-apps_](https://github.com/DescartesResearch/fishnet/pkgs/container/fishnet-apps). The CWL files reference both
 images, so the only requirements are docker and a [CWL Runner](https://www.commonwl.org/implementations/)
 supporting containerized execution, e.g. the reference runner [cwltool](https://cwltool.readthedocs.io/en/latest/cli.html#cwltool):
 ```shell
@@ -206,7 +206,7 @@ AfricapolisSpatialClustering --mode DBSC --distance-threshold 200 --min-cluster-
 | `AfricapolisEdgeVisualization` | [_EdgeVisualization.cwl_](cwl/EdgeVisualization.cwl) |
 
 ### Docker Image
-The [Dockerfile](Dockerfile) builds the binaries on top of `logru/fishnet-deps` and copies them into
+The [Dockerfile](Dockerfile) builds the binaries on top of `ghcr.io/descartesresearch/fishnet-deps` and copies them into
 a GDAL runtime image. Since the CWL files reference `logru/africapolis:latest`, a locally built image
 is picked up by `cwltool` instead of the published one:
 ```shell

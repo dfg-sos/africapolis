@@ -1,4 +1,4 @@
-FROM logru/fishnet-deps:latest AS build
+FROM ghcr.io/descartesresearch/fishnet-deps:latest AS build
 COPY ./src /africapolis/src
 COPY ./lib /africapolis/lib
 COPY CMakeLists.txt /africapolis/CMakeLists.txt
