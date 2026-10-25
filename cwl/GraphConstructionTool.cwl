@@ -1,5 +1,10 @@
 cwlVersion: v1.2
 class: CommandLineTool
+$namespaces:
+  eo: "https://dfg-sos.github.io/ontologies/eo-formats#"
+  sos: "https://dfg-sos.github.io/ontologies/cwl#"
+$schemas:
+  - https://dfg-sos.github.io/ontologies/releases/eo-formats/1.0.0/eo-formats.owl
 baseCommand: [SympolisGraphConstruction]
 hints:
   DockerRequirement:
@@ -12,14 +17,16 @@ requirements:
 inputs:
   primaryInput:
     type: File
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     inputBinding:
         prefix: -i
     doc: "Primary input, supplied as vector file object"
   additionalInput:
     type: File[]
     default: []
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     inputBinding:
         prefix: -a
     doc: "List of additional input vector files in proximity to the primary input, with their required secondary files (.dbf, .shx, .prj)"

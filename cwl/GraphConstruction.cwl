@@ -1,5 +1,10 @@
 cwlVersion: v1.2
 class: Workflow
+$namespaces:
+  eo: "https://dfg-sos.github.io/ontologies/eo-formats#"
+  sos: "https://dfg-sos.github.io/ontologies/cwl#"
+$schemas:
+  - https://dfg-sos.github.io/ontologies/releases/eo-formats/1.0.0/eo-formats.owl
 requirements:
   - class: SchemaDefRequirement
     types: 
@@ -10,7 +15,8 @@ requirements:
 inputs:
   vectorFiles:
     type: File[]
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     doc: "List of vector files to be used for graph construction. Each polygon must be associated with a unique FISHNET ID."
   filenamePrefix:
     type: string?

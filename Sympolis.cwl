@@ -1,10 +1,16 @@
 cwlVersion: v1.2
 class: Workflow
+$namespaces:
+  eo: "https://dfg-sos.github.io/ontologies/eo-formats#"
+  sos: "https://dfg-sos.github.io/ontologies/cwl#"
+$schemas:
+  - https://dfg-sos.github.io/ontologies/releases/eo-formats/1.0.0/eo-formats.owl
 requirements:
 - class: ScatterFeatureRequirement
 - class: StepInputExpressionRequirement
 - class: InlineJavascriptRequirement
 - class: SubworkflowFeatureRequirement
+- class: MultipleInputFeatureRequirement
 - class: SchemaDefRequirement
   types: 
     - $import: cwl/ClusterWorkload.yaml
@@ -15,11 +21,13 @@ inputs:
   shapefile:
     type: File?
     secondaryFiles: [^.shx, ^.dbf, ^.prj, ^.cpg?, ^.qpj?]
-    # format: SHP
+    format: eo:Shapefile
+    sos:expectedGeometryType: "Polygon"
     doc: "Input file to Sympolis workflow"
   vectorFile:
     type: File?
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     doc: "Input GeoPackage file to Sympolis workflow"
 
   # --- Split, run by FishnetSplit.cwl -------------------------------------------------------------
@@ -122,11 +130,13 @@ inputs:
 outputs:
   sympolis:
     type: File
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     outputSource: mergeConcaveHulls/mergedOutput
   multi_polygons:
     type: File
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     outputSource: mergeMultiPolygons/mergedOutput
 steps:
   split:
@@ -149,7 +159,8 @@ steps:
     in: 
       vectorFiles: filter/filteredVectorFile
       filenamePrefix: 
-        source: vectorFile
+        source: [shapefile, vectorFile]
+        pickValue: the_only_non_null
         valueFrom: $(self.nameroot)
       mode: graphConstructionMode
       distanceThreshold: graphDistanceThreshold
@@ -203,7 +214,8 @@ steps:
     in:
       vectorFiles: clustering/clusteredOutput
       outputPath:
-        source: vectorFile
+        source: [shapefile, vectorFile]
+        pickValue: the_only_non_null
         valueFrom: $("./"+self.nameroot+"_Sympolis_MultiPolygons")
     out: [mergedOutput]
   mergeConcaveHulls:
@@ -211,6 +223,7 @@ steps:
     in:
       vectorFiles: postFilter/filteredVectorFile
       outputPath:
-        source: vectorFile
+        source: [shapefile, vectorFile]
+        pickValue: the_only_non_null
         valueFrom: $("./"+self.nameroot+"_Sympolis")
     out: [mergedOutput]

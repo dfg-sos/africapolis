@@ -1,5 +1,10 @@
 cwlVersion: v1.2
 class: CommandLineTool
+$namespaces:
+  eo: "https://dfg-sos.github.io/ontologies/eo-formats#"
+  sos: "https://dfg-sos.github.io/ontologies/cwl#"
+$schemas:
+  - https://dfg-sos.github.io/ontologies/releases/eo-formats/1.0.0/eo-formats.owl
 baseCommand: [SympolisMSTVisualization]
 hints:
   DockerRequirement:
@@ -12,6 +17,8 @@ requirements:
 inputs:
     geometryFiles:
         type: File[]
+        format: eo:GeoPackage
+        sos:expectedGeometryType: "Polygon"
         doc: "Input vector files to visualize the edges of the graph"
         inputBinding:
             prefix: "-i"
@@ -37,7 +44,9 @@ inputs:
         inputBinding:
             prefix: "--debug"
 outputs:
-    mstShapefile:
+    mstVectorFile:
         type: File
+        format: eo:GeoPackage
+        sos:expectedGeometryType: "Polygon"
         outputBinding:
             glob: $(inputs.outputStem + "_mst.gpkg")
