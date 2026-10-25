@@ -111,14 +111,17 @@ Exactly one of the two is given, depending on the format of the input.
 | `--debug` | `false` | Enable debug logging in every step of the workflow |
 
 ### Job Files
-The parameters can also be passed on the command line (e.g. `cwltool Sympolis.cwl --vectorFile <File.gpkg> --clusteringMode BFS`),
-but a CWL job file is the practical way of keeping a parameter set around and reproducing a run
+The input file has to declare its format (see below), which a file passed on the command line
+(e.g. `cwltool Sympolis.cwl --vectorFile <File.gpkg>`) cannot do, so the workflow is run with a CWL job
+file. A job file is also the practical way of keeping a parameter set around and reproducing a run
 later. The [_jobs_](jobs) directory holds one ready to run job file per parameter set, each
-processing [_Kahama_Small.gpkg_](data/input/Kahama_Small.gpkg):
+processing [_Kahama_Small.gpkg_](data/input/Kahama_Small.gpkg), except for _default_shapefile.yml_, which reads the same
+data from [_Kahama_Small.shp_](data/input/Kahama_Small.shp):
 
 | Job file | Graph construction | Clustering |
 |---|---|---|
 | [_default.yml_](jobs/default.yml) | `DELAUNAY`, 200 m | `DBSCAN`, 200 m, min. 3 settlements, urban areas below 1000 m² dropped |
+| [_default_shapefile.yml_](jobs/default_shapefile.yml) | `DELAUNAY`, 200 m | `DBSCAN`, 200 m, min. 3 settlements, urban areas below 1000 m² dropped (as _default.yml_, reading the shapefile) |
 | [_bfs200_delaunay.yml_](jobs/bfs200_delaunay.yml) | `DELAUNAY`, 200 m | `BFS`, 200 m |
 | [_bfs200_sweep.yml_](jobs/bfs200_sweep.yml) | `BUFFER_SWEEP`, 200 m, 5 neighbours | `BFS`, 200 m |
 | [_dbscan200_delaunay.yml_](jobs/dbscan200_delaunay.yml) | `DELAUNAY`, 200 m | `DBSCAN`, 200 m, min. 3 settlements |
@@ -132,6 +135,7 @@ processing [_Kahama_Small.gpkg_](data/input/Kahama_Small.gpkg):
 vectorFile:
   class: File
   path: ../data/input/Kahama_Small.gpkg  # replace with your own input file path
+  format: "https://dfg-sos.github.io/ontologies/eo-formats#GeoPackage"
 # --- Parameters ---
 # Delaunay graph construction with DBSCAN clustering at 200m, dropping urban areas below 1000 m².
 partitionDepth: 1
@@ -142,6 +146,10 @@ clusterDistanceThreshold: 200.0
 minClusterSize: 3
 minArea: 1000.0
 ```
+The `format` entry states the format of the input file as a term of the
+[SOS Earth Observation file formats](https://dfg-sos.github.io/ontologies/) vocabulary:
+`eo-formats#GeoPackage` for a `vectorFile`, `eo-formats#Shapefile` for a `shapefile`. The CWL
+runner rejects input files declaring no or a different format.
 Paths in a job file are resolved relative to the job file itself. A job file describes a run
 completely, so command line arguments cannot be added on top of it. Copy one of the job files and
 adapt its `vectorFile` (or `shapefile`) entry to run a parameter set on your own data.

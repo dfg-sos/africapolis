@@ -1,0 +1,16 @@
+# --- Input data ---
+# The sidecar files (.shx, .dbf, .prj, .cpg) next to the shapefile are picked up automatically.
+shapefile:
+  class: File
+  path: ../data/input/Kahama_Small.shp  # replace with your own input file path
+  format: "https://dfg-sos.github.io/ontologies/eo-formats#Shapefile"
+# --- Parameters ---
+# Same parameters as default.yml: Delaunay graph construction with DBSCAN clustering at 200m,
+# dropping urban areas below 1000 m².
+partitionDepth: 1
+graphConstructionMode: DELAUNAY
+graphDistanceThreshold: 200.0
+clusteringMode: DBSCAN
+clusterDistanceThreshold: 200.0
+minClusterSize: 3
+minArea: 1000.0
