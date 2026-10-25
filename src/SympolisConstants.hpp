@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace Africapolis {
+namespace Sympolis {
 
 static inline const std::string CLUSTER_ID_FIELD = "ClusterID";
 static inline const std::string FROM_ID_FIELD = "FromID";

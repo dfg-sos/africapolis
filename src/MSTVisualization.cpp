@@ -14,7 +14,7 @@
 #include <fishnet/PathHelper.h>
 #include <fishnet/OGRGeometryAdapter.hpp>
 #include <fishnet/MSTAlgorithm.hpp>
-#include "AfricapolisConstants.hpp"
+#include "SympolisConstants.hpp"
 
 
 class MSTVisualization: public Task {
@@ -141,8 +141,8 @@ public:
         }
         spdlog::debug("Visualizing {} MST edges with a buffer of {} meters", edges.size(), bufferInMeters);
         auto outputLayer = fishnet::VectorIO::empty<EdgeGeometryType>(spatialRef);
-        auto fromField = outputLayer.addSizeField(Africapolis::FROM_ID_FIELD).value_or_throw();
-        auto toField = outputLayer.addSizeField(Africapolis::TO_ID_FIELD).value_or_throw();
+        auto fromField = outputLayer.addSizeField(Sympolis::FROM_ID_FIELD).value_or_throw();
+        auto toField = outputLayer.addSizeField(Sympolis::TO_ID_FIELD).value_or_throw();
         auto bufferedEdges = bufferEdges(edges | std::views::keys, spatialRef);
         for (auto && [idx,edgePolygon] : bufferedEdges | std::views::enumerate) {
             auto index = static_cast<size_t>(idx);

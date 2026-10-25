@@ -6,7 +6,7 @@
 #include <string>
 #include <type_traits>
 
-namespace Africapolis {
+namespace Sympolis {
 
 /**
  * @brief Restricts an option to the symbols of an enumeration, matched regardless of case.

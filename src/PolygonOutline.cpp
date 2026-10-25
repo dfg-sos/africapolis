@@ -14,7 +14,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "AfricapolisConstants.hpp"
+#include "SympolisConstants.hpp"
 
 /*
  * Every geometry of this stage is read from a data source, handed to OGR for buffering,
@@ -47,7 +47,7 @@ private:
 
     std::unordered_map<size_t,std::vector<fishnet::Feature<SettlementShape_t>>> clusterSettlements(fishnet::VectorLayer<SettlementShape_t> && settlements) const {
         std::unordered_map<size_t,std::vector<fishnet::Feature<SettlementShape_t>>> clusters;
-        auto clusterIDField = settlements.getSizeField(Africapolis::CLUSTER_ID_FIELD).value_or_throw();
+        auto clusterIDField = settlements.getSizeField(Sympolis::CLUSTER_ID_FIELD).value_or_throw();
         for(auto && settlement : settlements.getFeatures()){
             size_t clusterID = settlement.getAttribute(clusterIDField).value_or_throw();
             clusters[clusterID].emplace_back(std::move(settlement));
@@ -56,8 +56,8 @@ private:
     }
     std::unordered_map<size_t, std::vector<MSTEdge_t>> mstEdges(const fishnet::AbstractVectorFile & mstFile) const {
         auto mstLayer = fishnet::VectorIO::read<MSTEdge_t>(mstFile);
-        auto fromField = mstLayer.getSizeField(Africapolis::FROM_ID_FIELD).value_or_throw();
-        auto toField = mstLayer.getSizeField(Africapolis::TO_ID_FIELD).value_or_throw();
+        auto fromField = mstLayer.getSizeField(Sympolis::FROM_ID_FIELD).value_or_throw();
+        auto toField = mstLayer.getSizeField(Sympolis::TO_ID_FIELD).value_or_throw();
         std::unordered_map<size_t, std::vector<MSTEdge_t>> nodesToFeature;
         for (auto && [idx,feature] : std::move(mstLayer).getFeatures() | std::views::enumerate) {
             size_t fromID = feature.getAttribute(fromField).value_or_throw();
@@ -181,10 +181,10 @@ public:
         auto outputLayer = fishnet::VectorIO::emptyCopy<ResultShape_t>(inputLayer);
         auto clusteredSettlements = clusterSettlements(std::move(inputLayer));
         auto IDField = outputLayer.getSizeField(Task::FISHNET_ID_FIELD).value_or_throw();
-        auto clusterField = outputLayer.getSizeField(Africapolis::CLUSTER_ID_FIELD).value_or_throw();
+        auto clusterField = outputLayer.getSizeField(Sympolis::CLUSTER_ID_FIELD).value_or_throw();
         auto geometryHasher = std::hash<ResultShape_t>();
         for (auto && [clusterID, settlements] : clusteredSettlements) {
-            if(clusterID == Africapolis::NOISE_CLUSTER_ID){
+            if(clusterID == Sympolis::NOISE_CLUSTER_ID){
                 for (auto && settlement : settlements) {
                     // the settlement is written out unchanged and not used afterwards, so its
                     // geometry is taken rather than cloned; its attributes are a separate member
@@ -219,7 +219,7 @@ public:
 
 int main(int argc, char* argv[]) {
     using namespace fishnet::geometry;
-    CLI::App app{"AfricapolisSettlementOutline"};
+    CLI::App app{"SympolisSettlementOutline"};
     std::string settlementFile;
     std::string mstFile;
     double initialBufferDistance;

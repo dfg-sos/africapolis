@@ -1,9 +1,9 @@
 cwlVersion: v1.2
 class: CommandLineTool
-baseCommand: [AfricapolisGraphComponents]
+baseCommand: [SympolisGraphComponents]
 hints:
   DockerRequirement:
-    dockerPull: ghcr.io/dfg-sos/africapolis:latest
+    dockerPull: ghcr.io/dfg-sos/sympolis:latest
 requirements:
   ResourceRequirement:
     coresMin: 1

@@ -192,7 +192,7 @@ public:
 
 int main(int argc, char * argv[]){
     spdlog::info("Starting GraphComponents binary");
-    CLI::App app{"AfricapolisGraphComponents"};
+    CLI::App app{"SympolisGraphComponents"};
     std::vector<std::string> binaryGraphFiles;
     size_t maxComponentsPerWorkload = DEFAULT_MAX_COMPONENTS_PER_WORKLOAD;
     bool debug = false;

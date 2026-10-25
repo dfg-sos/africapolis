@@ -11,7 +11,7 @@ on:
       - "CMakeLists.txt"
       - "Dockerfile"
       - ".dockerignore"
-      - "Africapolis.cwl"
+      - "Sympolis.cwl"
       - "cwl/**"
       - "jobs/default.yml"
       - ".github/workflows/ci.yml"
@@ -26,7 +26,7 @@ concurrency:
 
 env:
   # Must match the dockerPull of the cwl/*.cwl tools, so the CWL run uses the freshly built image.
-  IMAGE: ghcr.io/dfg-sos/africapolis
+  IMAGE: ghcr.io/dfg-sos/sympolis
   CWLTOOL_VERSION: 3.1.20260108082145
 
 jobs:
@@ -63,8 +63,8 @@ jobs:
 
       - name: Smoke test binaries
         run: |
-          for bin in AfricapolisGraphConstruction AfricapolisGraphComponents AfricapolisSpatialClustering \
-                     AfricapolisPolygonOutline AfricapolisEdgeVisualization AfricapolisMSTVisualization; do
+          for bin in SympolisGraphConstruction SympolisGraphComponents SympolisSpatialClustering \
+                     SympolisPolygonOutline SympolisEdgeVisualization SympolisMSTVisualization; do
             echo "::group::$bin"
             docker run --rm "$IMAGE:latest" "$bin" --help
             echo "::endgroup::"
@@ -78,14 +78,14 @@ jobs:
         run: pip install "cwltool==$CWLTOOL_VERSION"
 
       - name: Validate workflow
-        run: cwltool --validate Africapolis.cwl
+        run: cwltool --validate Sympolis.cwl
 
       - name: Run example workflow (jobs/default.yml)
-        run: cwltool --outdir ci-output Africapolis.cwl jobs/default.yml
+        run: cwltool --outdir ci-output Sympolis.cwl jobs/default.yml
 
       - name: Check outputs
         run: |
-          for f in ci-output/Kahama_Small_Africapolis.gpkg ci-output/Kahama_Small_Africapolis_MultiPolygons.gpkg; do
+          for f in ci-output/Kahama_Small_Sympolis.gpkg ci-output/Kahama_Small_Sympolis_MultiPolygons.gpkg; do
             test -s "$f" || { echo "::error::Missing or empty output $f"; exit 1; }
           done
           ls -lh ci-output
@@ -94,7 +94,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: africapolis-output
+          name: sympolis-output
           path: ci-output/
           if-no-files-found: ignore
 

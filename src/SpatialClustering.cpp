@@ -12,7 +12,7 @@
 #include <fishnet/PathHelper.h>
 #include "BinarySettlementGraphAdjacency.hpp"
 #include "SettlementLayerReader.hpp"
-#include "AfricapolisConstants.hpp"
+#include "SympolisConstants.hpp"
 #include "EnumOption.hpp"
 
 
@@ -53,7 +53,7 @@ struct ClusteringParameters {
             case ClusterMode::DBSCAN:
                 {
                     // the algorithm outlives this call, so the distance function is copied into it
-                    return fishnet::DBSCAN<T>(this->distanceThreshold, Africapolis::requiredFor(this->minClusterSize,"--min-cluster-size",this->mode), [distanceFunction](const T & lhs, const T & rhs){
+                    return fishnet::DBSCAN<T>(this->distanceThreshold, Sympolis::requiredFor(this->minClusterSize,"--min-cluster-size",this->mode), [distanceFunction](const T & lhs, const T & rhs){
                         return fishnet::geometry::shapeDistance(lhs,rhs,distanceFunction);
                     });
                 }
@@ -62,8 +62,8 @@ struct ClusteringParameters {
             case ClusterMode::DBSC:
                 return fishnet::DBSCBuilder<T>()
                     .setEps(this->distanceThreshold)
-                    .setBeta(Africapolis::requiredFor(this->beta,"--beta",this->mode))
-                    .setMinPts(Africapolis::requiredFor(this->minClusterSize,"--min-cluster-size",this->mode))
+                    .setBeta(Sympolis::requiredFor(this->beta,"--beta",this->mode))
+                    .setMinPts(Sympolis::requiredFor(this->minClusterSize,"--min-cluster-size",this->mode))
                     .setDistanceFunction([distanceFunction](const T & lhs, const T & rhs){
                         return fishnet::geometry::shapeDistance(lhs,rhs,distanceFunction);
                     })
@@ -116,7 +116,7 @@ public:
         // Store result
         auto outputLayer = fishnet::VectorIO::empty<ShapeType>(spatialRef);
         auto idField = outputLayer.addSizeField(Task::FISHNET_ID_FIELD).value_or_throw();
-        auto clusterField = outputLayer.addSizeField(Africapolis::CLUSTER_ID_FIELD).value_or_throw();
+        auto clusterField = outputLayer.addSizeField(Sympolis::CLUSTER_ID_FIELD).value_or_throw();
         for(auto && cluster : result.clusters){
             size_t clusterID = std::ranges::fold_left(cluster, 0, [](size_t current, const auto & settlement){ return current + settlement.key(); });
             for(auto && settlement : cluster){
@@ -129,7 +129,7 @@ public:
         for(auto && noise : result.noise){
             fishnet::Feature<ShapeType> feature(noise.geometry());
             feature.setAttribute(idField, noise.key());
-            feature.setAttribute(clusterField, Africapolis::NOISE_CLUSTER_ID);
+            feature.setAttribute(clusterField, Sympolis::NOISE_CLUSTER_ID);
             outputLayer.addFeature(std::move(feature));
         }
         auto extension = (*std::ranges::begin(vectorFiles)).getPath().extension().string();
@@ -140,7 +140,7 @@ public:
 
 int main(int argc, char *argv[]){
     // Parse cmd arguments
-    CLI::App app{"Africapolis Spatial Clustering"};
+    CLI::App app{"Sympolis Spatial Clustering"};
     std::vector<std::string> inputfiles;
     std::string graphFile;
     std::string outputStem;
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]){
     app.add_option("--outputStem", outputStem, "Output filename stem for storing the clustered vector file");
     app.add_option("--mode",parameters.mode,"Clustering algorithm applied to the settlement graph")
         ->required()
-        ->transform(Africapolis::enumSymbols<ClusterMode>());
+        ->transform(Sympolis::enumSymbols<ClusterMode>());
     app.add_option("--distance-threshold",parameters.distanceThreshold,"Maximum distance in meters between two settlements of the same cluster")
         ->required()
         ->check(CLI::PositiveNumber);
@@ -162,7 +162,7 @@ int main(int argc, char *argv[]){
     app.add_option("--t1",parameters.t1,"Custom t1 threshold of the DBSC heuristic. Derived from the data when omitted")
         ->check(CLI::PositiveNumber);
     app.add_option("--attribute-mapper",parameters.attributeFunction,"Settlement attribute combined with the spatial distance by the DBSC mode")
-        ->transform(Africapolis::enumSymbols<DBSCAttributeFunction>());
+        ->transform(Sympolis::enumSymbols<DBSCAttributeFunction>());
     app.add_flag("--debug",debug,"Enable debug logging");
     CLI11_PARSE(app, argc, argv); 
     if(debug){
