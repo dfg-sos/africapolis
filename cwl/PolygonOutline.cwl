@@ -1,9 +1,9 @@
 class: CommandLineTool
 cwlVersion: v1.2
-baseCommand: [AfricapolisPolygonOutline]
+baseCommand: [SympolisPolygonOutline]
 hints:
   DockerRequirement:
-    dockerPull: ghcr.io/dfg-sos/africapolis:latest
+    dockerPull: ghcr.io/dfg-sos/sympolis:latest
 requirements:
   InlineJavascriptRequirement: {}
   ResourceRequirement:

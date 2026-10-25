@@ -1,11 +1,13 @@
-# Africapolis Workflow
-The *Africapolis* Workflow clusters and visualizes urban areas from individual building footprint polygons. It is orchestrated with the [Common Workflow Language (CWL)](https://www.commonwl.org/user_guide/), with each stage being a C++ command line program wrapped with CWL. The implementation depends on the [*Fishnet*](https://github.com/DescartesResearch/fishnet) framework.
+# Sympolis Workflow
+The *Sympolis* Workflow clusters and visualizes urban areas from individual building footprint polygons. It is orchestrated with the [Common Workflow Language (CWL)](https://www.commonwl.org/user_guide/), with each stage being a C++ command line program wrapped with CWL. The implementation depends on the [*Fishnet*](https://github.com/DescartesResearch/fishnet) framework.
 
-![](doc/Kahama_Africapolis.png)
+The name derives from the Ancient Greek *sympoliteia* (συμπολιτεία), from *syn* (σύν, "together") and *polis* (πόλις, "city"), the union of several city-states into a single political community. Likewise, the workflow merges individual settlements into contiguous urban areas. Sympolis was originally developed in collaboration with the [OECD/SWAC Africapolis](https://africapolis.org) team.
+
+![](doc/Kahama_Sympolis.png)
 
 # Quick Start
 All binaries of the workflow and the GDAL library are packaged in the
-[_ghcr.io/dfg-sos/africapolis_](https://github.com/dfg-sos/africapolis/pkgs/container/africapolis) docker image, the Fishnet tools in
+[_ghcr.io/dfg-sos/sympolis_](https://github.com/dfg-sos/sympolis/pkgs/container/sympolis) docker image, the Fishnet tools in
 [_ghcr.io/descartesresearch/fishnet-apps_](https://github.com/DescartesResearch/fishnet/pkgs/container/fishnet-apps). The CWL files reference both
 images, so the only requirements are docker and a [CWL Runner](https://www.commonwl.org/implementations/)
 supporting containerized execution, e.g. the reference runner [cwltool](https://cwltool.readthedocs.io/en/latest/cli.html#cwltool):
@@ -14,17 +16,17 @@ python -m venv .venv
 source .venv/bin/activate
 python -m pip install cwltool
 ```
-Run the workflow's main definition file ([_Africapolis.cwl_](Africapolis.cwl)) with the
+Run the workflow's main definition file ([_Sympolis.cwl_](Sympolis.cwl)) with the
 [_default_](jobs/default.yml) job file, which processes the small example input
 [_Kahama_Small.gpkg_](data/input/Kahama_Small.gpkg) shipped with the repository:
 ```shell
-cwltool Africapolis.cwl jobs/default.yml
+cwltool Sympolis.cwl jobs/default.yml
 ```
 To process your own data, copy the job file and point its `vectorFile` (or `shapefile`) entry to
 your input, see [Configuration](#configuration).
 
 # Workflow Structure
-[_Africapolis.cwl_](Africapolis.cwl) is the entry point of the workflow. It references the tools and
+[_Sympolis.cwl_](Sympolis.cwl) is the entry point of the workflow. It references the tools and
 subworkflows in the [_cwl_](cwl) directory, each of which wraps one command line program. The stages
 run in the following order, the input being processed tile by tile until the last two steps merge
 the tiles back together.
@@ -43,7 +45,7 @@ the tiles back together.
 ### Outputs
 | Output | Info |
 |---|---|
-| `africapolis` | Vector file (.gpkg) holding one polygon per urban area |
+| `sympolis` | Vector file (.gpkg) holding one polygon per urban area |
 | `multi_polygons` | Vector file (.gpkg) holding the clustered settlement polygons, each carrying the `ClusterID` of the urban area it belongs to |
 
 # Configuration
@@ -109,7 +111,7 @@ Exactly one of the two is given, depending on the format of the input.
 | `--debug` | `false` | Enable debug logging in every step of the workflow |
 
 ### Job Files
-The parameters can also be passed on the command line (e.g. `cwltool Africapolis.cwl --vectorFile <File.gpkg> --clusteringMode BFS`),
+The parameters can also be passed on the command line (e.g. `cwltool Sympolis.cwl --vectorFile <File.gpkg> --clusteringMode BFS`),
 but a CWL job file is the practical way of keeping a parameter set around and reproducing a run
 later. The [_jobs_](jobs) directory holds one ready to run job file per parameter set, each
 processing [_Kahama_Small.gpkg_](data/input/Kahama_Small.gpkg):
@@ -145,19 +147,19 @@ completely, so command line arguments cannot be added on top of it. Copy one of 
 adapt its `vectorFile` (or `shapefile`) entry to run a parameter set on your own data.
 
 # HPC Deployment
-Use the [Africapolis Shellscript](prod/hpc/run-africapolis.sh) to install and run the workflow on a HPC system. You can also do the following steps manually:
+Use the [Sympolis Shellscript](prod/hpc/run-sympolis.sh) to install and run the workflow on a HPC system. You can also do the following steps manually:
 ### 1. Upload Files
-- Upload `Africapolis.cwl`, the `cwl` directory holding the tools it references and the `jobs` directory holding the parameter presets, keeping the directory structure of the repository
+- Upload `Sympolis.cwl`, the `cwl` directory holding the tools it references and the `jobs` directory holding the parameter presets, keeping the directory structure of the repository
 - Upload input files or pull from STAC
 ### 2. Install Toil
 - Create python venv
 ```
 module load python
-python -m venv ~/africapolis-workflow/venv
+python -m venv ~/sympolis-workflow/venv
 ```
 - Source venv
 ``` 
-source ~/africapolis-workflow/venv/bin/activate
+source ~/sympolis-workflow/venv/bin/activate
 ```
 - Install via pip
 ```
@@ -168,61 +170,61 @@ Execute via the `toil-cwl-runner` directly (current directory will be output dir
 job file which sets the input and the parameters of the run
 ```
 module load apptainer
-source ~/africapolis-workflow/venv/bin/activate
-toil-cwl-runner --singularity --batchSystem slurm ~/africapolis-workflow/Africapolis.cwl <Job.yml>
+source ~/sympolis-workflow/venv/bin/activate
+toil-cwl-runner --singularity --batchSystem slurm ~/sympolis-workflow/Sympolis.cwl <Job.yml>
 ```
-The [shellscript](prod/hpc/run-africapolis.sh) does this for you, taking the input file and a
+The [shellscript](prod/hpc/run-sympolis.sh) does this for you, taking the input file and a
 preset holding everything else, the partition depth included. Without `--preset`,
 [_default.yml_](jobs/default.yml) is used.
 ```
-./run-africapolis.sh --preset ~/africapolis-workflow/jobs/dbsc200_sweep.yml <File.gpkg>
+./run-sympolis.sh --preset ~/sympolis-workflow/jobs/dbsc200_sweep.yml <File.gpkg>
 ```
 Alternatively, pass a complete job file with `--job`, which is run as is, its input included. Its
 relative paths are resolved against the location of the job file.
 ```
-./run-africapolis.sh --job <Job.yml>
+./run-sympolis.sh --job <Job.yml>
 ```
-The outputs are written to `~/africapolis-workflow/output/<Experiment>`, named after the input file
+The outputs are written to `~/sympolis-workflow/output/<Experiment>`, named after the input file
 and the preset (`<File>_<Preset>`), or after the job file when using `--job`.
 
 # Development
 ### Binaries (C++)
-The required binaries of *Africapolis* can be manually install on the system. This can be achieved with the [install](install.sh) script. Make sure that the install prefix location (*$INSTALL_PREFIX*) is referenced in *PATH* (e.g. *usr/local/bin*). 
+The required binaries of *Sympolis* can be manually install on the system. This can be achieved with the [install](install.sh) script. Make sure that the install prefix location (*$INSTALL_PREFIX*) is referenced in *PATH* (e.g. *usr/local/bin*). 
 ```shell
 ./install.sh
 ```
 Each binary is configured through its own command line options and takes no configuration file.
 Run a binary with `--help` to list them, for instance:
 ```
-AfricapolisSpatialClustering --mode DBSC --distance-threshold 200 --min-cluster-size 5 --beta 2 -i <File.gpkg> -g <Graph.bin> --outputStem <Stem>
+SympolisSpatialClustering --mode DBSC --distance-threshold 200 --min-cluster-size 5 --beta 2 -i <File.gpkg> -g <Graph.bin> --outputStem <Stem>
 ```
 | Binary | Wrapped by |
 |---|---|
-| `AfricapolisGraphConstruction` | [_GraphConstructionTool.cwl_](cwl/GraphConstructionTool.cwl) |
-| `AfricapolisGraphComponents` | [_GraphComponentsTool.cwl_](cwl/GraphComponentsTool.cwl) |
-| `AfricapolisSpatialClustering` | [_SpatialClusteringTool.cwl_](cwl/SpatialClusteringTool.cwl) |
-| `AfricapolisMSTVisualization` | [_MSTVisualization.cwl_](cwl/MSTVisualization.cwl) |
-| `AfricapolisPolygonOutline` | [_PolygonOutline.cwl_](cwl/PolygonOutline.cwl) |
-| `AfricapolisEdgeVisualization` | [_EdgeVisualization.cwl_](cwl/EdgeVisualization.cwl) |
+| `SympolisGraphConstruction` | [_GraphConstructionTool.cwl_](cwl/GraphConstructionTool.cwl) |
+| `SympolisGraphComponents` | [_GraphComponentsTool.cwl_](cwl/GraphComponentsTool.cwl) |
+| `SympolisSpatialClustering` | [_SpatialClusteringTool.cwl_](cwl/SpatialClusteringTool.cwl) |
+| `SympolisMSTVisualization` | [_MSTVisualization.cwl_](cwl/MSTVisualization.cwl) |
+| `SympolisPolygonOutline` | [_PolygonOutline.cwl_](cwl/PolygonOutline.cwl) |
+| `SympolisEdgeVisualization` | [_EdgeVisualization.cwl_](cwl/EdgeVisualization.cwl) |
 
 ### Docker Image
 The [Dockerfile](Dockerfile) builds the binaries on top of `ghcr.io/descartesresearch/fishnet-deps` and copies them into
-a GDAL runtime image. Since the CWL files reference `ghcr.io/dfg-sos/africapolis:latest`, a locally built image
+a GDAL runtime image. Since the CWL files reference `ghcr.io/dfg-sos/sympolis:latest`, a locally built image
 is picked up by `cwltool` instead of the published one:
 ```shell
-docker build -t ghcr.io/dfg-sos/africapolis:latest .
-cwltool Africapolis.cwl jobs/default.yml
+docker build -t ghcr.io/dfg-sos/sympolis:latest .
+cwltool Sympolis.cwl jobs/default.yml
 ```
 The image is published by the CI pipeline.
 
 ### CI/CD
 The [CI workflow](.github/workflows/ci.yml) runs on pushes and pull requests to `main` that touch
 the binaries, the image or the workflow tested by it (`src`, `lib`, `CMakeLists.txt`, `Dockerfile`,
-`Africapolis.cwl`, `cwl`, `jobs/default.yml` and the pipeline itself). Changes to
+`Sympolis.cwl`, `cwl`, `jobs/default.yml` and the pipeline itself). Changes to
 the documentation, the other job files or the HPC scripts do not trigger it.
-1. Builds the binaries by building the [Dockerfile](Dockerfile) (`ghcr.io/dfg-sos/africapolis:latest` and `ghcr.io/dfg-sos/africapolis:<version>`, the version taken from [CMakeLists.txt](CMakeLists.txt))
+1. Builds the binaries by building the [Dockerfile](Dockerfile) (`ghcr.io/dfg-sos/sympolis:latest` and `ghcr.io/dfg-sos/sympolis:<version>`, the version taken from [CMakeLists.txt](CMakeLists.txt))
 2. Runs every binary with `--help` as a smoke test
-3. Validates [Africapolis.cwl](Africapolis.cwl) and executes it with [jobs/default.yml](jobs/default.yml) using `cwltool`, against the freshly built image. The outputs are uploaded as the `africapolis-output` artifact.
+3. Validates [Sympolis.cwl](Sympolis.cwl) and executes it with [jobs/default.yml](jobs/default.yml) using `cwltool`, against the freshly built image. The outputs are uploaded as the `sympolis-output` artifact.
 4. On pushes to `main` only, publishes both image tags to the GitHub Container Registry.
 
 Publishing authenticates with the workflow's `GITHUB_TOKEN`, so no secrets are needed.

@@ -16,11 +16,11 @@ inputs:
     type: File?
     secondaryFiles: [^.shx, ^.dbf, ^.prj, ^.cpg?, ^.qpj?]
     # format: SHP
-    doc: "Input file to Africapolis workflow"
+    doc: "Input file to Sympolis workflow"
   vectorFile:
     type: File?
     # format: GPKG
-    doc: "Input GeoPackage file to Africapolis workflow"
+    doc: "Input GeoPackage file to Sympolis workflow"
 
   # --- Split, run by FishnetSplit.cwl -------------------------------------------------------------
   partitionDepth:
@@ -120,7 +120,7 @@ inputs:
     default: false
     doc: "Enable debug logging in every step of the workflow"
 outputs:
-  africapolis:
+  sympolis:
     type: File
     # format: GPKG
     outputSource: mergeConcaveHulls/mergedOutput
@@ -204,7 +204,7 @@ steps:
       vectorFiles: clustering/clusteredOutput
       outputPath:
         source: vectorFile
-        valueFrom: $("./"+self.nameroot+"_Africapolis_MultiPolygons")
+        valueFrom: $("./"+self.nameroot+"_Sympolis_MultiPolygons")
     out: [mergedOutput]
   mergeConcaveHulls:
     run: cwl/FishnetMerge.cwl
@@ -212,5 +212,5 @@ steps:
       vectorFiles: postFilter/filteredVectorFile
       outputPath:
         source: vectorFile
-        valueFrom: $("./"+self.nameroot+"_Africapolis")
+        valueFrom: $("./"+self.nameroot+"_Sympolis")
     out: [mergedOutput]

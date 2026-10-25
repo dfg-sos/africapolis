@@ -41,7 +41,7 @@ private:
                 return fishnet::geometry::PolygonNeighbours::delaunay(this->settlements,distancePredicate);
             case GraphConstructionMode::BUFFER_SWEEP:
             {
-                const size_t MAX_NEIGHBORS_PER_NODE = Africapolis::requiredFor(parameters.maxNeighboursPerNode,"--max-neighbors-per-node",parameters.mode);
+                const size_t MAX_NEIGHBORS_PER_NODE = Sympolis::requiredFor(parameters.maxNeighboursPerNode,"--max-neighbors-per-node",parameters.mode);
                 auto boundingBoxPolygonWrapper = [this](const SettlementShape<S> & settPolygon ){
                     /* Create scaled aaBB containing at least all points reachable from the polygon within the maximum edge distance*/
                     auto aaBB = fishnet::geometry::Rectangle<fishnet::math::DEFAULT_NUMERIC>(settPolygon);
@@ -101,7 +101,7 @@ public:
 
 int main(int argc, char *argv[]){
     // Parse cmd arguments
-    CLI::App app{"Africapolis Graph Construction"};
+    CLI::App app{"Sympolis Graph Construction"};
     std::string primaryInput;
     std::vector<std::string> additionalInputs;
     GraphConstructionParameters parameters;
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]){
     app.add_option("-a,--additional_input",additionalInputs,"Additional input vector files storing the settlements")->each(CLI::ExistingFile);
     app.add_option("--mode",parameters.mode,"Method used to connect neighbouring settlements")
         ->required()
-        ->transform(Africapolis::enumSymbols<GraphConstructionMode>());
+        ->transform(Sympolis::enumSymbols<GraphConstructionMode>());
     app.add_option("--distance-threshold",parameters.distanceThreshold,"Maximum distance in meters between two settlements sharing an edge")
         ->required()
         ->check(CLI::PositiveNumber);
