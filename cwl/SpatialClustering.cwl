@@ -1,5 +1,10 @@
 cwlVersion: v1.2
 class: Workflow
+$namespaces:
+  eo: "https://dfg-sos.github.io/ontologies/eo-formats#"
+  sos: "https://dfg-sos.github.io/ontologies/cwl#"
+$schemas:
+  - https://dfg-sos.github.io/ontologies/releases/eo-formats/1.0.0/eo-formats.owl
 requirements:
 - class: SchemaDefRequirement
   types: 
@@ -11,7 +16,8 @@ inputs:
     doc: "Object containing the json workload definition and the graph file"
   files: 
     type: File[]
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     doc: "List of vector files to be used for assigning the workload for the clustering"
   mode:
     type:
@@ -46,12 +52,12 @@ inputs:
 outputs:
   clusteredOutput:
     type: File
-    # format: GPKG
+    sos:expectedGeometryType: "Polygon"
     outputSource: clustering/clusteredOutput
   clusterMSTs:
     type: File
-    # format: GPKG
-    outputSource: mstVisualization/mstShapefile
+    sos:expectedGeometryType: "Polygon"
+    outputSource: mstVisualization/mstVectorFile
 steps:
     prepare_cluster_workload:
         run:
@@ -61,7 +67,8 @@ steps:
                     type: ComponentsOutput.yaml#ComponentsOutput
                 files: 
                     type: File[]
-                    # format: GPKG
+                    format: eo:GeoPackage
+                    sos:expectedGeometryType: "Polygon"
                     doc: "List of vector files to be used for assigning the workload for the clustering step"
             outputs:
                 clusterWorkload:
@@ -102,7 +109,7 @@ steps:
           valueFrom: $("Edges_"+ inputs.clusterWorkload.graphBinary.nameroot)
         buffer: mstBuffer
         debug: debug
-      out: [mstShapefile]
+      out: [mstVectorFile]
     clustering:
       run: SpatialClusteringTool.cwl
       in:

@@ -1,5 +1,10 @@
 cwlVersion: v1.2
 class: CommandLineTool
+$namespaces:
+  eo: "https://dfg-sos.github.io/ontologies/eo-formats#"
+  sos: "https://dfg-sos.github.io/ontologies/cwl#"
+$schemas:
+  - https://dfg-sos.github.io/ontologies/releases/eo-formats/1.0.0/eo-formats.owl
 baseCommand: [FishnetVectorFilePreprocessor]
 hints:
   DockerRequirement:
@@ -31,7 +36,8 @@ arguments:
 inputs:
   vectorFile:
     type: File
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     inputBinding:
       prefix: --input
   minArea:
@@ -50,6 +56,7 @@ inputs:
 outputs:
   filteredVectorFile:
     type: File
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     outputBinding:
       glob: "*_filtered.gpkg"  # Gather all files associate with the vector file

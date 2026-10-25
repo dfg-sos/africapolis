@@ -2,6 +2,7 @@
 vectorFile:
   class: File
   path: ../data/input/Kahama_Small.gpkg  # replace with your own input file path
+  format: "https://dfg-sos.github.io/ontologies/eo-formats#GeoPackage"
 # --- Parameters ---
 # Delaunay graph construction with DBSCAN clustering at 200m, dropping urban areas below 1000 m².
 partitionDepth: 1

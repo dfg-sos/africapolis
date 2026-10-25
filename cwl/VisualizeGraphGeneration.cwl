@@ -1,15 +1,21 @@
 cwlVersion: v1.2
 class: Workflow
+$namespaces:
+  eo: "https://dfg-sos.github.io/ontologies/eo-formats#"
+  sos: "https://dfg-sos.github.io/ontologies/cwl#"
+$schemas:
+  - https://dfg-sos.github.io/ontologies/releases/eo-formats/1.0.0/eo-formats.owl
 requirements:
 - class: InlineJavascriptRequirement
 - class: StepInputExpressionRequirement
 - class: SubworkflowFeatureRequirement
 
 inputs:
-    shapefile:
+    vectorFile:
         type: File
-        secondaryFiles: [^.shx, ^.dbf, ^.prj, ^.cpg?, ^.qpj?]
-        doc: "Input shapefile to visualize the edges of the graph"
+        format: eo:GeoPackage
+        sos:expectedGeometryType: "Polygon"
+        doc: "Input GeoPackage, whose settlements carry a FISHNET ID, to visualize the edges of the graph"
     graphConstructionMode:
         type:
           type: enum
@@ -28,14 +34,14 @@ inputs:
         default: false
         doc: "Enable debug logging"
 outputs:
-    edges_shapefile:
+    edges:
         type: File
-        outputSource: edge_visualization/edgeShapefile
+        outputSource: edge_visualization/edgeVectorFile
 steps:
     graph_generation:
         run: GraphConstructionTool.cwl
         in: 
-            primaryInput: shapefile
+            primaryInput: vectorFile
             mode: graphConstructionMode
             distanceThreshold: graphDistanceThreshold
             maxNeighborsPerNode: maxNeighborsPerNode
@@ -45,10 +51,10 @@ steps:
         run: EdgeVisualization.cwl
         in:
             geometryFiles:
-                source: shapefile
+                source: vectorFile
                 valueFrom: $([self])
             graphFile: graph_generation/graphBinary
             outputStem:
-                source: shapefile
+                source: vectorFile
                 valueFrom: $(self.nameroot)
-        out: [edgeShapefile]
+        out: [edgeVectorFile]

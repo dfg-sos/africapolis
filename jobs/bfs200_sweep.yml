@@ -2,6 +2,7 @@
 vectorFile:
   class: File
   path: ../data/input/Kahama_Small.gpkg
+  format: "https://dfg-sos.github.io/ontologies/eo-formats#GeoPackage"
 partitionDepth: 1
 
 # --- Parameters ---

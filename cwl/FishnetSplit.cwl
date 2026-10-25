@@ -1,5 +1,10 @@
 cwlVersion: v1.2
 class: CommandLineTool
+$namespaces:
+  eo: "https://dfg-sos.github.io/ontologies/eo-formats#"
+  sos: "https://dfg-sos.github.io/ontologies/cwl#"
+$schemas:
+  - https://dfg-sos.github.io/ontologies/releases/eo-formats/1.0.0/eo-formats.owl
 baseCommand: [FishnetVectorFileSplitter]
 
 hints:
@@ -12,9 +17,16 @@ requirements:
     coresMin: 1
     ramMin: 8192
 
+# The tiles are always written as GeoPackages, whatever the format of the input.
+arguments:
+  - prefix: -f
+    valueFrom: GEOPACKAGE
+
 inputs:
   shapefile:
     type: File?
+    format: eo:Shapefile
+    sos:expectedGeometryType: "Polygon"
     secondaryFiles:
       - "^.shx"
       - "^.dbf"
@@ -27,55 +39,22 @@ inputs:
 
   vectorFile:
     type: File?
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     inputBinding:
       prefix: --input
     doc: "Input GeoPackage file (no secondary files required)"
-
-  outputDir:
-    type: string
-    default: "./"
-    inputBinding:
-      prefix: -o
-    doc: "Output directory"
-
-  outputFormat:
-    type: string
-    default: "GEOPACKAGE"
-    inputBinding:
-      prefix: -f
-    doc: "Output format (SHAPEFILE or GEOPACKAGE)"
 
   depth:
     type: int
     inputBinding:
       prefix: --depth
 
-  xOffset:
-    type: int
-    default: 0
-    inputBinding:
-      prefix: -x
-    doc: "X offset for the naming of the output tiles"
-
-  yOffset:
-    type: int
-    default: 0
-    inputBinding:
-      prefix: -y
-    doc: "Y offset for the naming of the output tiles"
-
 outputs:
   split_files:
     type: File[]
-    secondaryFiles:
-      - "^.shx?"
-      - "^.dbf?"
-      - "^.prj?"
-      - "^.cpg?"
-      - "^.qpj?"
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     outputBinding:
-      glob:
-        - "$((inputs.shapefile|| inputs.vectorFile).nameroot)*.shp"
-        - "$((inputs.shapefile|| inputs.vectorFile).nameroot)*.gpkg"
-    doc: "Split output spatial files (.shp or .gpkg)"
+      glob: "$((inputs.shapefile|| inputs.vectorFile).nameroot)*.gpkg"
+    doc: "Split output GeoPackage files"

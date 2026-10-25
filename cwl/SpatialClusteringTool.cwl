@@ -1,5 +1,10 @@
 cwlVersion: v1.2
 class: CommandLineTool
+$namespaces:
+  eo: "https://dfg-sos.github.io/ontologies/eo-formats#"
+  sos: "https://dfg-sos.github.io/ontologies/cwl#"
+$schemas:
+  - https://dfg-sos.github.io/ontologies/releases/eo-formats/1.0.0/eo-formats.owl
 baseCommand: [SympolisSpatialClustering]
 hints:
   DockerRequirement:
@@ -12,7 +17,8 @@ requirements:
 inputs:
   vectorFiles:
     type: File[]
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     inputBinding:
         prefix: -i
     doc: "List of input vector files, with their required secondary files (.dbf, .shx, .prj)"
@@ -78,7 +84,8 @@ inputs:
 outputs:
   clusteredOutput:
     type: File
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     outputBinding:
         glob: "$(inputs.outputStem).gpkg"
     doc: "Clustering output vector file"

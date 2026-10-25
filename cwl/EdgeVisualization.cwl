@@ -1,5 +1,10 @@
 cwlVersion: v1.2
 class: CommandLineTool
+$namespaces:
+  eo: "https://dfg-sos.github.io/ontologies/eo-formats#"
+  sos: "https://dfg-sos.github.io/ontologies/cwl#"
+$schemas:
+  - https://dfg-sos.github.io/ontologies/releases/eo-formats/1.0.0/eo-formats.owl
 baseCommand: [SympolisEdgeVisualization]
 hints:
   DockerRequirement:
@@ -12,6 +17,8 @@ requirements:
 inputs:
   geometryFiles:
     type: File[]
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     doc: "Input vector files storing the settlements of the graph"
     inputBinding:
       prefix: -i
@@ -27,8 +34,10 @@ inputs:
     inputBinding:
       prefix: -o
 outputs:
-  edgeShapefile:
+  edgeVectorFile:
     type: File
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     outputBinding:
-      glob: $(inputs.outputStem + "_edges.*")
+      glob: $(inputs.outputStem + "_edges.gpkg")
     doc: "Vector file storing one polygon per edge of the settlement graph"

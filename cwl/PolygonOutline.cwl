@@ -1,4 +1,9 @@
 class: CommandLineTool
+$namespaces:
+  eo: "https://dfg-sos.github.io/ontologies/eo-formats#"
+  sos: "https://dfg-sos.github.io/ontologies/cwl#"
+$schemas:
+  - https://dfg-sos.github.io/ontologies/releases/eo-formats/1.0.0/eo-formats.owl
 cwlVersion: v1.2
 baseCommand: [SympolisPolygonOutline]
 hints:
@@ -12,12 +17,14 @@ requirements:
 inputs:
   vectorFile:
     type: File
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     inputBinding:
       prefix: -i
   mstFile:
     type: File
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     inputBinding:
       prefix: -m
   initialBuffer:
@@ -41,7 +48,8 @@ inputs:
 outputs:
   outlineVectorFile:
     type: File
-    # format: GPKG
+    format: eo:GeoPackage
+    sos:expectedGeometryType: "Polygon"
     outputBinding:
       glob: "*.gpkg"
     doc: "Output vector file with polygon outlines"

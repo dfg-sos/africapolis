@@ -1,5 +1,9 @@
 cwlVersion: v1.2
 class: CommandLineTool
+$namespaces:
+  eo: "https://dfg-sos.github.io/ontologies/eo-formats#"
+$schemas:
+  - https://dfg-sos.github.io/ontologies/releases/eo-formats/1.0.0/eo-formats.owl
 baseCommand: [FishnetVectorFileMerger]
 hints:
   DockerRequirement:
@@ -12,7 +16,7 @@ requirements:
 inputs:
   vectorFiles:
     type: File[]
-    # format: GPKG
+    format: eo:GeoPackage
     inputBinding:
         prefix: -i
     doc: "List of input vector files, with their required secondary files (.dbf, .shx, .prj)"
@@ -26,7 +30,7 @@ inputs:
 outputs:
   mergedOutput:
     type: File
-    # format: GPKG
+    format: eo:GeoPackage
     outputBinding:
         glob: "$(inputs.outputPath).gpkg"
     doc: "Merged output file"
