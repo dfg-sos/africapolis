@@ -8,7 +8,7 @@ $schemas:
 baseCommand: [FishnetVectorFilePreprocessor]
 hints:
   DockerRequirement:
-    dockerPull: ghcr.io/descartesresearch/fishnet-apps:2.0.0
+    dockerPull: ghcr.io/descartesresearch/fishnet-apps:2.0.1
 requirements:
   InlineJavascriptRequirement: {}
   ResourceRequirement:
