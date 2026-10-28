@@ -226,13 +226,17 @@ cwltool Sympolis.cwl jobs/default.yml
 The image is published by the CI pipeline.
 
 ### CI/CD
-The [CI workflow](.github/workflows/ci.yml) runs on pushes and pull requests to `main` that touch
+The [CI workflow](.github/workflows/ci.yml) runs on release tags `v*`, on manual dispatch and on pushes and pull requests to `main` that touch
 the binaries, the image or the workflow tested by it (`src`, `lib`, `CMakeLists.txt`, `Dockerfile`,
 `Sympolis.cwl`, `cwl`, `jobs/default.yml` and the pipeline itself). Changes to
 the documentation, the other job files or the HPC scripts do not trigger it.
-1. Builds the binaries by building the [Dockerfile](Dockerfile) (`ghcr.io/dfg-sos/sympolis:latest` and `ghcr.io/dfg-sos/sympolis:<version>`, the version taken from [CMakeLists.txt](CMakeLists.txt))
+1. Builds the binaries by building the [Dockerfile](Dockerfile) as `ghcr.io/dfg-sos/sympolis:latest`
 2. Runs every binary with `--help` as a smoke test
 3. Validates [Sympolis.cwl](Sympolis.cwl) and executes it with [jobs/default.yml](jobs/default.yml) using `cwltool`, against the freshly built image. The outputs are uploaded as the `sympolis-output` artifact.
-4. On pushes to `main` only, publishes both image tags to the GitHub Container Registry.
+4. Publishes the tested image to the GitHub Container Registry:
+   - release tags `v<version>` publish the stable `:<version>` and `:latest` tags. The tag must match the version in [CMakeLists.txt](CMakeLists.txt), otherwise the run fails
+   - pushes to `main` publish the development tag `:edge`
+   - manual runs publish the same tags for the selected `main` branch or release tag if `publish` is checked
+   - pull requests and other branches publish nothing
 
 Publishing authenticates with the workflow's `GITHUB_TOKEN`, so no secrets are needed.

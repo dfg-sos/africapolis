@@ -2,9 +2,11 @@ name: CI
 
 # Only changes to the binaries, the image or the workflow exercised by jobs/default.yml are tested.
 # Documentation, other job presets and the HPC scripts do not trigger a run.
+# Path filters are not evaluated for tag pushes, so every release tag triggers a run.
 on:
   push:
     branches: [main]
+    tags: ["v*"]
     paths: &tested-paths
       - "src/**"
       - "lib/**"
@@ -19,10 +21,16 @@ on:
     branches: [main]
     paths: *tested-paths
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publish the image (edge from main, version and latest from a v* tag)"
+        type: boolean
+        default: false
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Never cancel a run that may be publishing.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   # Must match the dockerPull of the cwl/*.cwl tools, so the CWL run uses the freshly built image.
@@ -44,20 +52,45 @@ jobs:
           VERSION=$(grep -oP 'project\s*\([^)]*VERSION\s+\K[0-9]+\.[0-9]+\.[0-9]+' CMakeLists.txt)
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
+      # Release tags v<version> publish <version> and latest, main publishes edge, other refs publish nothing.
+      - name: Determine image tags to publish
+        id: tags
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          case "$GITHUB_REF" in
+            refs/tags/v*)
+              if [ "${GITHUB_REF_NAME#v}" != "$VERSION" ]; then
+                echo "::error::Tag $GITHUB_REF_NAME does not match version $VERSION in CMakeLists.txt"
+                exit 1
+              fi
+              TAGS="$IMAGE:$VERSION $IMAGE:latest" ;;
+            refs/heads/main)
+              TAGS="$IMAGE:edge" ;;
+            *)
+              TAGS="" ;;
+          esac
+          echo "tags=$TAGS" >> "$GITHUB_OUTPUT"
+          # The CWL tools reference latest, so the image is always built as latest as well.
+          echo "build-tags=$(echo "$IMAGE:latest $TAGS" | tr ' ' '\n' | sort -u | paste -sd,)" >> "$GITHUB_OUTPUT"
+          if [ -n "$TAGS" ] && { [ "$GITHUB_EVENT_NAME" = push ] || [ "${{ inputs.publish }}" = true ]; }; then
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: docker/setup-buildx-action@v3
 
       # The build stage of the Dockerfile compiles and installs all binaries.
-      # The image is loaded into the local daemon, so the CWL run below uses it
-      # instead of pulling the published image from the registry.
+      # The image is loaded into the local daemon as latest, so the CWL run below uses it
+      # instead of pulling the published image from the registry. latest is only pushed for release tags.
       - name: Build binaries and Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           load: true
           push: false
-          tags: |
-            ${{ env.IMAGE }}:latest
-            ${{ env.IMAGE }}:${{ steps.version.outputs.version }}
+          tags: ${{ steps.tags.outputs.build-tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -99,7 +132,7 @@ jobs:
           if-no-files-found: ignore
 
       - name: Log in to GitHub Container Registry
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: steps.tags.outputs.publish == 'true'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -108,7 +141,8 @@ jobs:
 
       # Pushes the exact image that passed the CWL run above.
       - name: Publish Docker image
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        if: steps.tags.outputs.publish == 'true'
         run: |
-          docker push "$IMAGE:${{ steps.version.outputs.version }}"
-          docker push "$IMAGE:latest"
+          for tag in ${{ steps.tags.outputs.tags }}; do
+            docker push "$tag"
+          done
